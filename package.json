@@ -1,0 +1,43 @@
+{
+  "name": "pawsitive_database",
+  "version": "1.0.0",
+  "description": "BE for Pawsitive - test",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "test": "cross-env DB_ENV=testing jest --watch --verbose"
+  },
+  "jest": {
+    "testEnvirnoment": "node"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skysthelimit68/pawsitive_database.git"
+  },
+  "keywords": [],
+  "author": "Ming Liu <mliu@brooksidemediaco.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/skysthelimit68/pawsitive_database/issues"
+  },
+  "homepage": "https://github.com/skysthelimit68/pawsitive_database#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "cross-env": "^5.2.0",
+    "dotenv": "^8.0.0",
+    "express": "^4.17.1",
+    "helmet": "^3.18.0",
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^0.17.6",
+    "pg": "^7.11.0",
+    "sqlite3": "^4.0.9"
+  },
+  "devDependencies": {
+    "apidoc": "^0.17.7",
+    "jest": "^24.8.0",
+    "nodemon": "^1.19.1",
+    "supertest": "^4.0.2"
+  }
+}

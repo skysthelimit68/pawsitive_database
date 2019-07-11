@@ -1,23 +1,50 @@
 module.exports = {
-    intToString,
-    stringToInt,
-    animalToBody
+    intToSex,
+    sexToInt,
+    animalToBody,
+    animalsToBody,
+    intToUpgrade,
+    upgradeToInt,
+    shelterToBody
   };
   
-  function intToString(int) {
+  function intToSex(int) {
     return int === 1 ? "Male" : "Female";
   }
   
-  function stringToInt(string) {
+  function sexToInt(string) {
     return string === "Male" ? 1 : 0;
   }
   
+  function animalsToBody(animals) {
+      const result = animals.map( animal => {
+          return {...animal, sex: intToSex(animal.sex)}
+      })
+      return result;
+  }
+
   function animalToBody(animal) {
     const result = {
       ...animal,
-      sex: intToString(animal.sex),
+      sex: intToSex(animal.sex)
     };
     return result;
+  }
+
+  function intToUpgrade(int) {
+      return int === 1 ? "Yes" : "No";
+  }
+
+  function upgradeToInt(string) {
+      return string === "Yes" ? 1 : 0;
+  }
+
+  function shelterToBody(shelter) {
+      const result = {
+          ...shelter,
+          isUpgraded: intToUpgrade(shelter.isUpgraded)
+      }
+      return result
   }
   
   

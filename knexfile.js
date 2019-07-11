@@ -3,16 +3,9 @@ const dbConnection = process.env.DATABASE_URL;
 module.exports = {
 
   development: {
-    client: 'sqlite3',
-    connection: {
-      filename: './data/pawsitive.db3'
-    },
+    client: 'pg',
+    connection: 'postgres://127.0.0.1/pawsnfind',
     useNullAsDefault: true,
-    pool: {
-      afterCreate: (conn, done) => {
-        conn.run('PRAGMA foreign_keys = ON', done);
-      },
-    },
     migrations: {
       directory: './data/migrations',
     },

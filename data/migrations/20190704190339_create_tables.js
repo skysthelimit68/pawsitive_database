@@ -7,6 +7,12 @@ exports.up = function(knex, Promise) {
             .notNullable()
             .unique();
     })
+    .createTable('sexes', tbl => {  //orphan table
+        tbl.increments();
+        tbl.string('sex', 128)
+            .notNullable()
+            .unique()
+    })  
     .createTable('species', tbl => {
         tbl.increments();
         tbl.string('species', 256)
@@ -19,25 +25,84 @@ exports.up = function(knex, Promise) {
             .notNullable()
             .unique();
     })
-    .createTable('pictures', tbl => {
+    .createTable('users', tbl => {
         tbl.increments();
-        tbl.string('img_url', 512)
+        tbl.string('username', 256)
             .notNullable()
             .unique();
-        tbl.integer('animal_id')
+        tbl.string('password', 256)
+            .notNullable();
+    })
+    .createTable('shelters', tbl => {
+        tbl.increments();
+        tbl.string('shelter', 512)
+            .notNullable()
+        tbl.boolean('isUpgraded').defaultTo(false)
+    })
+    .createTable('roles', tbl => {
+        tbl.increments();
+        tbl.string('role', 256)
+            .notNullable()
+            .unique();
+    })
+    .createTable('subscriptions', tbl => {
+        tbl.increments();
+        tbl.string('subscription', 256)
+            .notNullable()
+            .unique();
+        tbl.integer('subscription_duration_mo')
+            .notNullable();
+        tbl.decimal('price')
+            .notNullable();
+    })
+    .createTable('shelter_locations', tbl => {
+        tbl.increments();
+        tbl.string('location', 512)
+            .notNullable();
+        tbl.string('street_address', 512)
+        tbl.string('city', 256)
+            .notNullable();
+        tbl.string('state', 128)  // will need to create another table for list of state to keep it uniform
+            .notNullable();
+        tbl.string('zip_code', 128)
+            .notNullable();
+        tbl.string('phone', 128),
+        tbl.integer('shelter_id')
             .notNullable()
             .unsigned()
             .references("id")
-            .inTable("animals")
+            .inTable("shelters")
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
     })
-    .createTable('animal_followers', tbl => {
-        tbl.integer('animal_id')
+    .createTable('shelter_users', tbl => {
+        tbl.increments();
+        tbl.string('username', 256)
+            .notNullable()
+            .unique();
+        tbl.string('password', 256)
+            .notNullable();
+        tbl.integer('role_id')
             .notNullable()
             .unsigned()
             .references("id")
-            .inTable("animals")
+            .inTable("roles")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.integer('shelter_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("shelters")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+    })
+    .createTable('shelter_followers', tbl => {
+        tbl.integer('shelter_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("shelters")
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
         tbl.integer('user_id')
@@ -47,6 +112,47 @@ exports.up = function(knex, Promise) {
             .inTable("users")
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
+    })
+    
+    .createTable('donations', tbl => {
+        tbl.increments();
+        tbl.integer('user_id')
+            .notNullable()             
+            .unsigned()
+            .references("id")
+            .inTable("users")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.integer('shelter_id')
+            .notNullable()             
+            .unsigned()
+            .references("id")
+            .inTable("shelters")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.decimal('amount')
+            .notNullable()
+            .unsigned()
+    })
+    .createTable('shelter_subscriptions', tbl => {
+        tbl.increments();
+        tbl.integer('shelter_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("shelters")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.integer('subscription_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("subscriptions")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.timestamps();
+        tbl.date('expiration_date')
+            .notNullable();
     })
     .createTable('animals', tbl => {
         tbl.increments();
@@ -83,12 +189,54 @@ exports.up = function(knex, Promise) {
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
     })
-    .createTable('sexes', tbl => {  //orphan table
-        tbl.increments();
-        tbl.string('sex', 128)
+    .createTable('animal_followers', tbl => {
+        tbl.integer('animal_id')
             .notNullable()
-            .unique()
-    })    
+            .unsigned()
+            .references("id")
+            .inTable("animals")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.integer('user_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("users")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+    })
+    .createTable('animal_admin', tbl => {
+        tbl.increments();
+        tbl.string('note', 1024)
+            .notNullable();
+        tbl.integer('shelter_user_id') //might need to change to shelter_id if shelter users are not utilized
+            .notNullable()             // or totally remove this column
+            .unsigned()
+            .references("id")
+            .inTable("shelter_users")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+        tbl.integer('animal_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("animals")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+    })
+    .createTable('pictures', tbl => {
+        tbl.increments();
+        tbl.string('img_url', 512)
+            .notNullable()
+            .unique();
+        tbl.integer('animal_id')
+            .notNullable()
+            .unsigned()
+            .references("id")
+            .inTable("animals")
+            .onDelete("RESTRICT")
+            .onUpdate("CASCADE");
+    })
     .createTable('applications', tbl => {
         tbl.increments();
         tbl.integer('animal_id')
@@ -120,69 +268,6 @@ exports.up = function(knex, Promise) {
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
     })
-    .createTable('users', tbl => {
-        tbl.increments();
-        tbl.string('username', 256)
-            .notNullable()
-            .unique();
-        tbl.string('password', 256)
-            .notNullable();
-    })
-    .createTable('donations', tbl => {
-        tbl.increments();
-        tbl.integer('user_id')
-            .notNullable()             
-            .unsigned()
-            .references("id")
-            .inTable("users")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.integer('shelter_id')
-            .notNullable()             
-            .unsigned()
-            .references("id")
-            .inTable("shelters")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.decimal('amount')
-            .notNullable()
-            .unsigned()
-    })
-    .createTable('shelter_followers', tbl => {
-        tbl.integer('shelter_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("shelters")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.integer('user_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("users")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-    })
-    .createTable('animal_admin', tbl => {
-        tbl.increments();
-        tbl.string('note', 1024)
-            .notNullable();
-        tbl.integer('shelter_user_id') //might need to change to shelter_id if shelter users are not utilized
-            .notNullable()             // or totally remove this column
-            .unsigned()
-            .references("id")
-            .inTable("shelter_users")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.integer('animal_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("animals")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-    })
     .createTable('application_admin', tbl => {
         tbl.increments();
         tbl.string('note', 1024)
@@ -201,89 +286,7 @@ exports.up = function(knex, Promise) {
             .inTable("applications")
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
-    })
-    .createTable('shelters', tbl => {
-        tbl.increments();
-        tbl.string('shelter', 512)
-            .notNullable()
-        tbl.boolean('isUpgraded').defaultTo(false)
-    })
-    .createTable('shelter_subscriptions', tbl => {
-        tbl.increments();
-        tbl.integer('shelter_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("shelters")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.integer('subscription_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("subscriptions")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.timestamps();
-        tbl.date('expiration_date')
-            .notNullable();
-    })
-    .createTable('roles', tbl => {
-        tbl.increments();
-        tbl.string('role', 256)
-            .notNullable()
-            .unique();
-    })
-    .createTable('shelter_users', tbl => {
-        tbl.increments();
-        tbl.string('username', 256)
-            .notNullable()
-            .unique();
-        tbl.string('password', 256)
-            .notNullable();
-        tbl.integer('role_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("roles")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-        tbl.integer('shelter_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("shelters")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-    })
-    .createTable('shelter_locations', tbl => {
-        tbl.increments();
-        tbl.string('street_address', 512)
-        tbl.string('city', 256)
-            .notNullable();
-        tbl.string('state', 128)  // will need to create another table for list of state to keep it uniform
-            .notNullable();
-        tbl.string('zip_code', 128)
-            .notNullable();
-        tbl.string('phone', 128),
-        tbl.integer('shelter_id')
-            .notNullable()
-            .unsigned()
-            .references("id")
-            .inTable("shelters")
-            .onDelete("RESTRICT")
-            .onUpdate("CASCADE");
-    })
-    .createTable('subscriptions', tbl => {
-        tbl.increments();
-        tbl.string('subscription', 256)
-            .notNullable()
-            .unique();
-        tbl.integer('subscription_duration_mo')
-            .notNullable();
-        tbl.decimal('price')
-            .notNullable();
-    });
+    })   
 };
 
 exports.down = function(knex, Promise) {

@@ -12,6 +12,7 @@ router.get('/', (req, res) => {
     })
 })
 
+//get animal by id
 router.get('/:id', (req, res) => {
     Animals.get(req.params.id)
     .then( animal => {
@@ -21,5 +22,7 @@ router.get('/:id', (req, res) => {
         res.status(500).json({ message: "Error getting animal", error: error.toString()})
     })
 })
+
+
 
 module.exports = router;

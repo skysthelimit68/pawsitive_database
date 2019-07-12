@@ -2,7 +2,8 @@
 exports.up = function(knex, Promise) {
   return knex.schema
     .createTable('animal_status', tbl => {
-        tbl.increments();
+        tbl.increments()
+        .defaultTo(knex.raw('uuid_generate_v4()'));
         tbl.string('status', 256)
             .notNullable()
             .unique();
@@ -37,7 +38,8 @@ exports.up = function(knex, Promise) {
         tbl.increments();
         tbl.string('shelter', 512)
             .notNullable()
-        tbl.boolean('isUpgraded').defaultTo(false)
+        tbl.boolean('isUpgraded')
+            .defaultTo(false)
     })
     .createTable('roles', tbl => {
         tbl.increments();
@@ -113,7 +115,6 @@ exports.up = function(knex, Promise) {
             .onDelete("RESTRICT")
             .onUpdate("CASCADE");
     })
-    
     .createTable('donations', tbl => {
         tbl.increments();
         tbl.integer('user_id')

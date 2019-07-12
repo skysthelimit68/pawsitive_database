@@ -1,7 +1,8 @@
 
-exports.seed = function(knex, Promise) {
+exports.seed = async function(knex, Promise) {
+  await knex('donations').del()
+  await knex.raw('ALTER SEQUENCE donations_id_seq RESTART WITH 1')  
   // Deletes ALL existing entries
-  return knex('donations').truncate()
     .then(function () {
       // Inserts seed entries
       return knex('donations').insert([
